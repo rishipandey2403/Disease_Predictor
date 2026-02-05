@@ -5,6 +5,8 @@ import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.utils import resample
+from sklearn.metrics import classification_report
 
 # Load dataset
 data = pd.read_csv('../dataset/liver_disease.csv', header=None)
@@ -17,36 +19,37 @@ data.columns = [
 # Encode gender
 data['Gender'] = data['Gender'].map({'Male':1, 'Female':0})
 
-# Fill missing values
 data.fillna(data.mean(), inplace=True)
 
-X = data.drop('Target', axis=1)
-y = data['Target']
+# Separate classes
+disease = data[data.Target == 1]
+healthy = data[data.Target == 2]
 
-# Convert labels
-y = y.apply(lambda x: 1 if x == 1 else 0)
+# Downsample disease to match healthy
+disease_down = resample(disease,
+                        replace=False,
+                        n_samples=len(healthy),
+                        random_state=42)
 
-# Scale features
+balanced = pd.concat([disease_down, healthy])
+
+X = balanced.drop('Target', axis=1)
+y = balanced['Target'].apply(lambda x: 1 if x == 1 else 0)
+
 scaler = StandardScaler()
 X = scaler.fit_transform(X)
 
-# Balanced split
 X_train, X_test, y_train, y_test = train_test_split(
     X, y,
     test_size=0.2,
-    stratify=y,
     random_state=42
 )
 
-# Balanced model
-model = RandomForestClassifier(class_weight='balanced')
-
+model = RandomForestClassifier(n_estimators=300)
 model.fit(X_train, y_train)
 
-accuracy = model.score(X_test, y_test)
-print("Model accuracy:", accuracy)
+print(classification_report(y_test, model.predict(X_test)))
 
-# Save model + scaler
 pickle.dump((model, scaler), open('../saved_models/liver_model.sav', 'wb'))
 
-print("Liver model retrained and saved!")
+print("Balanced liver model saved!")
