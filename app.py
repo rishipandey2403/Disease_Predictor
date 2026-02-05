@@ -17,7 +17,7 @@ working_dir = os.path.dirname(os.path.abspath(__file__))
 diabetes_model = pickle.load(open(f'{working_dir}/saved_models/diabetes_model.sav', 'rb'))
 heart_disease_model = pickle.load(open(f'{working_dir}/saved_models/heart_disease_model.sav', 'rb'))
 parkinsons_model = pickle.load(open(f'{working_dir}/saved_models/parkinsons_model.sav', 'rb'))
-liver_model = pickle.load(open(f'{working_dir}/saved_models/liver_model.sav', 'rb'))
+liver_model, liver_scaler = pickle.load(open('saved_models/liver_model.sav','rb'))
 
 # ---------------- Sidebar ----------------
 with st.sidebar:
@@ -151,8 +151,10 @@ if selected == 'Liver Disease Prediction':
     AG = st.number_input('Albumin and Globulin Ratio')
 
     if st.button('Liver Test Result'):
-        prediction = liver_model.predict([[Age, Gender, TB, DB, Alkphos,
-                                           SGPT, SGOT, TP, ALB, AG]])
+        scaled = liver_scaler.transform([[Age, Gender, TB, DB, Alkphos,
+                                  SGPT, SGOT, TP, ALB, AG]])
+
+        prediction = liver_model.predict(scaled)
 
         if prediction[0] == 1:
             st.success('Liver Disease Detected')
