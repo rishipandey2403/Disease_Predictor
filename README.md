@@ -68,12 +68,12 @@ pip install -r requirements.txt
 
 ### 2) Run locally
 ```bash
-PYTHONPATH=src streamlit run app.py
+streamlit run app.py
 ```
 
 ### 3) Run tests
 ```bash
-PYTHONPATH=src pytest -q
+pytest -q
 ```
 
 ---
@@ -98,21 +98,3 @@ Built and deployed a production-style ML application for multi-disease risk scre
 - Add explainability layer (SHAP) for model transparency.
 - Add model metrics dashboard (ROC-AUC, confusion matrix, drift checks).
 - Add API layer (FastAPI) for service-oriented architecture.
-
-## Fix for Render "Not Found" / broken link
-If you see `Not Found` on a Render URL:
-1. Open Render Dashboard → your web service → **Settings**.
-2. Copy the exact **Public URL** Render generated for your service.
-3. Replace the README app link with that exact URL.
-4. Ensure the latest deploy uses this start command (already fixed in this repo):
-   - `PYTHONPATH=src streamlit run app.py --server.port $PORT --server.address 0.0.0.0`
-
-This repo now includes the corrected deployment command in both `render.yaml` and `Dockerfile`.
-
-
-### If Render still shows `ModuleNotFoundError: No module named 'health_assistant'`
-This means Render is still running an older commit where `app.py` imported from `src/health_assistant`.
-
-1. In Render dashboard, open **Manual Deploy** → **Deploy latest commit**.
-2. If still failing, use **Clear build cache & deploy**.
-3. Confirm deployed `app.py` starts with `import os` (not `from health_assistant...`).
